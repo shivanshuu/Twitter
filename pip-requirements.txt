@@ -1,0 +1,4 @@
+tweepy
+boto3
+nltk
+numpy
