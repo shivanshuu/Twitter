@@ -5,16 +5,17 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.htm
 
 2) Create an Amazon ElasticSerach Domain
 https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-gsg-create-domain.html
-
-3) Create an Amazon Kinesis Firehose to push data to ES Domain
+Create an Amazon Kinesis Firehose to push data to ES Domain
 https://docs.aws.amazon.com/firehose/latest/dev/basic-create.html
+or
+Go to CloudFormation Directory and use the teamplate to create Elasticsearch domain and Kinesis Firehose
 
-4) Create Twitter account and get access keys
+3) Create Twitter account and get access keys
 
-5) Download this git repository to EC2, put Twitter keys in accessConfig.py, install dependencies using setup.sh
+4) Download this git repository to EC2, put Twitter keys in accessConfig.py, install dependencies using setup.sh
 
-6) Merge getBatchData.py , translate.py, comprehend.py to get Twitter data in all languages for hiring and other keywords, 
+5) Merge getBatchData.py , translate.py, comprehend.py to get Twitter data in all languages for hiring and other keywords, 
 identify organization tweets and send to Kinesis Firehose
 
-7) View Data in Kibana on Amazon ES and create graphs like top hiring loctions
+6) View Data in Kibana on Amazon ES and create graphs like top hiring loctions
 
