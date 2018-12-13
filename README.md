@@ -8,7 +8,7 @@ https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-gsg-c
 Create an Amazon Kinesis Firehose to push data to ES Domain
 https://docs.aws.amazon.com/firehose/latest/dev/basic-create.html
 or
-Go to CloudFormation Directory and use the teamplate to create Elasticsearch domain and Kinesis Firehose
+Use CloudFormation Template. Run ./create-stack.sh
 
 3) Create Twitter account and get access keys
 

@@ -1,0 +1,157 @@
+{
+ "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "This template can be used to provision AWS resources required to ingest events from applications in a low latency, high throughput manner and store the events in an Elastic Search domain",
+  "Parameters": {
+        "ESDomain": {
+            "Description": "Name of Elastic Search Domain",
+            "Type": "String"
+        },
+        "IndexName": {
+            "Description": "Name of Elastic Search Index",
+            "Type": "String"
+        },
+        "KinesisFH": {
+            "Description": "Name of Kinesis FireHose",
+            "Type": "String"
+        },
+        "MyBackupBucket": {
+            "Description": "Name of Kinesis FireHose backup bucket",
+            "Type": "String"
+        },
+        "ESUser": {
+            "Description": "ARN of ElasticSearch User",
+            "Type": "String"
+        }
+  },
+  "Resources":{
+  "ElasticsearchDomain": {
+  "Type": "AWS::Elasticsearch::Domain",
+  "Properties": {
+    "DomainName": {"Ref": "ESDomain"},
+    "ElasticsearchClusterConfig": {
+      "DedicatedMasterEnabled": "true",
+      "InstanceCount": "1",
+      "ZoneAwarenessEnabled": "false",
+      "InstanceType": "m3.medium.elasticsearch",
+      "DedicatedMasterType": "m3.medium.elasticsearch",
+      "DedicatedMasterCount": "0"
+    },
+    "EBSOptions": {
+      "EBSEnabled": true,
+      "Iops": 0,
+      "VolumeSize": 20,
+      "VolumeType": "gp2"
+    },
+    "SnapshotOptions": {
+      "AutomatedSnapshotStartHour": "0"
+    },
+    "AccessPolicies": {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Effect": "Allow",
+        "Principal": {
+          "AWS": { "Ref" : "ESUser" }
+        },
+        "Action": "es:*",
+        "Resource": "*" 
+      }]
+    },
+    "AdvancedOptions": {
+      "rest.action.multi.allow_explicit_index": "true"
+    }
+    }
+  },
+  "ElasticSearchDeliveryStream": {
+  "Type": "AWS::KinesisFirehose::DeliveryStream",
+  "Properties": {
+    "DeliveryStreamName" : { "Ref" : "KinesisFH" },
+    "ElasticsearchDestinationConfiguration": {
+      "BufferingHints": {
+        "IntervalInSeconds": 60,
+        "SizeInMBs": 50
+      },
+      "CloudWatchLoggingOptions": {
+        "Enabled": true,
+        "LogGroupName": "deliverystream",
+        "LogStreamName": "elasticsearchDelivery"
+      },
+      "DomainARN": { "Fn::GetAtt" : ["ElasticsearchDomain", "Arn"] },
+      "IndexName": { "Ref" : "IndexName" },
+      "IndexRotationPeriod": "NoRotation",
+      "TypeName" : "fromFirehose",
+      "RetryOptions": {
+         "DurationInSeconds": "60"
+      },
+      "RoleARN": { "Fn::GetAtt" : ["deliveryRole", "Arn"] },
+      "S3BackupMode": "AllDocuments",
+      "S3Configuration": { 
+        "BucketARN": {"Fn::Join": ["", ["arn:aws:s3:::", {"Ref":"MyBackupBucket"}]]},
+        "BufferingHints": {
+            "IntervalInSeconds": "60",
+             "SizeInMBs": "50"
+        },
+        "CompressionFormat": "UNCOMPRESSED",
+        "Prefix": "firehose/",
+        "RoleARN": { "Fn::GetAtt" : ["deliveryRole", "Arn"] },
+        "CloudWatchLoggingOptions" : {
+          "Enabled" : true,
+          "LogGroupName" : "deliverystream",
+          "LogStreamName" : "s3Backup"
+        }
+      }
+    },
+    "DependsOn" : "ElasticsearchDomain"              
+  }
+},
+  "deliveryRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "firehose.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "StringEquals": {
+                  "sts:ExternalId": {"Ref":"AWS::AccountId"}
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "deliveryPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "firehose_delivery_policy",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:AbortMultipartUpload",
+                "s3:GetBucketLocation",
+                "s3:GetObject",
+                "s3:ListBucket",
+                "s3:ListBucketMultipartUploads",
+                "s3:PutObject"
+              ],
+              "Resource": [
+                {"Fn::Join": ["", ["arn:aws:s3:::", {"Ref":"MyBackupBucket"}]]},
+                {"Fn::Join": ["", ["arn:aws:s3:::", {"Ref":"MyBackupBucket"}, "*"]]}
+              ]
+            }
+          ]
+    	},
+	"Roles": [{"Ref": "deliveryRole"}]
+ 	}
+      }
+    }
+}

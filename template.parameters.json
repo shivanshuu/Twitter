@@ -1,0 +1,22 @@
+[
+  {
+    "ParameterKey": "ESDomain",
+    "ParameterValue": "twitter"
+  },
+  {
+    "ParameterKey": "IndexName",
+    "ParameterValue": "twitter_data"
+  },
+  {
+    "ParameterKey": "KinesisFH",
+    "ParameterValue": "twitter_fh"
+  },
+  {
+    "ParameterKey": "MyBackupBucket",
+    "ParameterValue": "twitter-es-data"
+  },
+  {
+    "ParameterKey": "ESUser",
+    "ParameterValue": "arn:aws:iam::874280160066:user/shivansu"
+  }
+]
