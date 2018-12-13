@@ -3,11 +3,14 @@
 1) Create an EC2 instance with Role to access Kinesis Firehose, Comprehend, Translate APIs
 https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html
 
-2) Create an Amazon ElasticSerach Domain
+2) 
+Create an Amazon ElasticSerach Domain
 https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-gsg-create-domain.html
+and 
 Create an Amazon Kinesis Firehose to push data to ES Domain
 https://docs.aws.amazon.com/firehose/latest/dev/basic-create.html
-or
+
+OR
 Use CloudFormation Template. Run ./create-stack.sh
 
 3) Create Twitter account and get access keys
